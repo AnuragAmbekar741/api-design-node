@@ -1,6 +1,9 @@
 import { Router } from 'express'
 import { z } from 'zod'
-import { payloadValidation } from '../middlewares/validation.ts'
+import {
+  payloadValidation,
+  paramValidation,
+} from '../middlewares/validation.ts'
 
 const router = Router()
 
@@ -8,11 +11,15 @@ const habitSchema = z.object({
   name: z.string(),
 })
 
+const habitParamsSchema = z.object({
+  id: z.string().max(2),
+})
+
 router.get('/', (req, res) => {
   res.json({ message: 'all your habits' })
 })
 
-router.get('/:id', (req, res) => {
+router.get('/:id', paramValidation(habitParamsSchema), (req, res) => {
   const habit = req.params.id
   res.json({ message: `your ${habit}` })
 })
