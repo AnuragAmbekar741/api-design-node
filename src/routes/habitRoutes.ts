@@ -1,6 +1,12 @@
 import { Router } from 'express'
+import { z } from 'zod'
+import { payloadValidation } from '../middlewares/validation.ts'
 
 const router = Router()
+
+const habitSchema = z.object({
+  name: z.string(),
+})
 
 router.get('/', (req, res) => {
   res.json({ message: 'all your habits' })
@@ -11,7 +17,7 @@ router.get('/:id', (req, res) => {
   res.json({ message: `your ${habit}` })
 })
 
-router.post('/', (req, res) => {
+router.post('/', payloadValidation(habitSchema), (req, res) => {
   res.json({ message: 'new habit added' }).status(201)
 })
 
