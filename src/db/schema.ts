@@ -36,7 +36,7 @@ export const habits = pgTable('habits', {
 
 export const entries = pgTable('entries', {
   id: uuid('id').primaryKey().defaultRandom(),
-  habitId: uuid('id')
+  habitId: uuid('habit_id')
     .references(() => habits.id, { onDelete: 'cascade' })
     .notNull(),
   completionDate: timestamp('completion_date').defaultNow().notNull(),
@@ -54,12 +54,12 @@ export const tags = pgTable('tags', {
 
 export const habitTags = pgTable('habit_tags', {
   id: uuid('id').primaryKey().defaultRandom(),
-  habitId: uuid('habit_Id')
+  habitId: uuid('habit_id')
     .references(() => habits.id, {
       onDelete: 'cascade',
     })
     .notNull(),
-  tagId: uuid('tags_Id')
+  tagId: uuid('tag_id')
     .references(() => tags.id, {
       onDelete: 'cascade',
     })
