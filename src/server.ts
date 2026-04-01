@@ -10,14 +10,23 @@ import { isTest } from '../env.ts'
 const app = express()
 
 //global middlewares
+
+//security headers
 app.use(helmet())
+
+//CORS
 app.use(
   cors({
     origin: ['http://localhost:5173/'],
   })
 )
+
+//Parse body
 app.use(express.json())
+//Parse URL
 app.use(express.urlencoded({ extended: true }))
+
+//Logging
 app.use(
   morgan('dev', {
     skip: () => isTest(),
@@ -25,7 +34,9 @@ app.use(
 )
 
 app.get('/health', (req, res) => {
-  res.send(`Something raw...`)
+  res.json({
+    message: 'Server health 100%',
+  })
 })
 
 app.use('/api/auth', authRoutes)
