@@ -1,7 +1,8 @@
 import type { Response } from 'express'
 import type { AuthenticatedRequest } from '../middlewares/authorisation.ts'
 import { db } from '../db/connection.ts'
-import { habits, entries, habitTags, tags } from '../db/schema.ts'
+import { habits, habitTags } from '../db/schema.ts'
+import { desc, eq } from 'drizzle-orm'
 
 export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -36,5 +37,37 @@ export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Failed to create habit' })
+  }
+}
+
+export const getUserHabits = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user!.id
+    const userHabitsWithTags = await db.query.habits.findMany({
+      where: eq(habits.userId, userId),
+      with: {
+        habitTags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+      orderBy: [desc(habits.createAt)],
+    })
+    const habitWithTag = userHabitsWithTags.map((habit) => ({
+      ...habit,
+      tags: habit.habitTags.map((ht) => ht.tag),
+      habitTags: undefined,
+    }))
+    res.status(200).json({
+      message: '',
+      habits: habitWithTag,
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch habits' })
   }
 }
