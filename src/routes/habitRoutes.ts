@@ -5,7 +5,11 @@ import {
   paramValidation,
 } from '../middlewares/validation.ts'
 import { apiGuard } from '../middlewares/authorisation.ts'
-import { createHabit, getUserHabits } from '../controllers/habitController.ts'
+import {
+  createHabit,
+  getUserHabits,
+  getUserHabit,
+} from '../controllers/habitController.ts'
 import { habitSchema } from '../db/schema.ts'
 
 const router = Router()
@@ -13,15 +17,12 @@ const router = Router()
 router.use(apiGuard)
 
 const habitParamsSchema = z.object({
-  id: z.string().max(2),
+  id: z.string(),
 })
 
 router.get('/', getUserHabits)
 
-router.get('/:id', paramValidation(habitParamsSchema), (req, res) => {
-  const habit = req.params.id
-  res.json({ message: `your ${habit}` })
-})
+router.get('/:id', paramValidation(habitParamsSchema), getUserHabit)
 
 router.post('/', payloadValidation(habitSchema), createHabit)
 

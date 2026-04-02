@@ -1,8 +1,8 @@
 import type { Response } from 'express'
 import type { AuthenticatedRequest } from '../middlewares/authorisation.ts'
 import { db } from '../db/connection.ts'
-import { habits, habitTags } from '../db/schema.ts'
-import { desc, eq } from 'drizzle-orm'
+import { habits, habitTags, entries } from '../db/schema.ts'
+import { desc, eq, and } from 'drizzle-orm'
 
 export const createHabit = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -70,4 +70,49 @@ export const getUserHabits = async (
     console.error(err)
     res.status(500).json({ error: 'Failed to fetch habits' })
   }
+}
+
+export const getUserHabit = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
+    const userhabit = await db.query.habits.findFirst({
+      where: and(eq(habits.id, id), eq(habits.userId, userId)),
+      with: {
+        habitTags: {
+          with: {
+            tag: true,
+          },
+        },
+        entries: {
+          orderBy: [desc(entries.completionDate)],
+          limit: 10,
+        },
+      },
+    })
+    if (!userhabit) {
+      return res.status(404).json({
+        error: 'Invalid habit id',
+      })
+    }
+    const habitWithTags = {
+      ...userhabit,
+      tags: userhabit.habitTags.map((ht) => ht.tag),
+      habitTags: undefined,
+    }
+    res.status(201).json({
+      habit: habitWithTags,
+    })
+  } catch (err) {
+    console.error('Something went wrong!')
+  }
+}
+
+export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id
+  const { id } = req.params
+  const { tags, ...updates } = req.body
 }
