@@ -4,8 +4,11 @@ import {
   payloadValidation,
   paramValidation,
 } from '../middlewares/validation.ts'
+import { apiGuard } from '../middlewares/authorisation.ts'
 
 const router = Router()
+
+router.use(apiGuard)
 
 const habitSchema = z.object({
   name: z.string(),

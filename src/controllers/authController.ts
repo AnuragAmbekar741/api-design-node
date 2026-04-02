@@ -4,8 +4,6 @@ import { users, type CreateUser } from '../db/schema.ts'
 import { generateToken } from '../utils/jwt.ts'
 import { hashPassword, comparePassword } from '../utils/password.ts'
 import { eq } from 'drizzle-orm'
-import { email } from 'zod'
-import { error } from 'console'
 
 export const register = async (
   req: Request<any, any, CreateUser>,
