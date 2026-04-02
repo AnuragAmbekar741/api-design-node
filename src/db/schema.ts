@@ -9,6 +9,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { z } from 'zod'
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -113,3 +114,14 @@ export const selectUserScehma = createSelectSchema(users)
 
 export const insertHabitSchema = createInsertSchema(habits)
 export const selectHabitSchema = createSelectSchema(habits)
+
+export const habitSchema = createInsertSchema(habits)
+  .omit({
+    id: true,
+    createAt: true,
+    updatedAt: true,
+    userId: true,
+  })
+  .extend({
+    tagIds: z.array(z.string().uuid()).default([]),
+  })

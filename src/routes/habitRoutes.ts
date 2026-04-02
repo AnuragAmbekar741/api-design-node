@@ -5,14 +5,12 @@ import {
   paramValidation,
 } from '../middlewares/validation.ts'
 import { apiGuard } from '../middlewares/authorisation.ts'
+import { createHabit } from '../controllers/habitController.ts'
+import { habitSchema } from '../db/schema.ts'
 
 const router = Router()
 
 router.use(apiGuard)
-
-const habitSchema = z.object({
-  name: z.string(),
-})
 
 const habitParamsSchema = z.object({
   id: z.string().max(2),
@@ -27,9 +25,7 @@ router.get('/:id', paramValidation(habitParamsSchema), (req, res) => {
   res.json({ message: `your ${habit}` })
 })
 
-router.post('/', payloadValidation(habitSchema), (req, res) => {
-  res.json({ message: 'new habit added' }).status(201)
-})
+router.post('/', payloadValidation(habitSchema), createHabit)
 
 router.delete('/:id', (req, res) => {
   res.json({ message: 'habit deleted' })

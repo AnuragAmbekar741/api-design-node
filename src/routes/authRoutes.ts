@@ -15,4 +15,6 @@ router.post('/register', payloadValidation(insertUserScehma), register)
 
 router.post('/login', payloadValidation(loginSchema), signIn)
 
+router.post('/refresh', () => {})
+
 export default router
