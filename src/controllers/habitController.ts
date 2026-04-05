@@ -112,7 +112,42 @@ export const getUserHabit = async (
 }
 
 export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id
-  const { id } = req.params
-  const { tags, ...updates } = req.body
+  try {
+    const userId = req.user!.id
+    const { id } = req.params
+    const { tagIds, ...updates } = req.body
+    const result = await db.transaction(async (tx) => {
+      const [updatedHabit] = await tx
+        .update(habits)
+        .set({
+          ...updates,
+          updatedAt: Date.now(),
+        })
+        .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+        .returning()
+
+      if (!updatedHabit) {
+        return res.status(400).end()
+      }
+
+      if (tagIds !== undefined) {
+        tx.delete(habits).where(eq(habitTags.habitId, id))
+      }
+      if (tagIds.length > 0) {
+        const habitValues = tagIds.map((tagId: string) => ({
+          habitId: id,
+          tagId,
+        }))
+        await tx.insert(habitTags).values(habitValues)
+      }
+      return updatedHabit
+    })
+    res.json({
+      message: 'Habit updated successfully',
+      habit: result,
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'Something went wrong' })
+  }
 }
