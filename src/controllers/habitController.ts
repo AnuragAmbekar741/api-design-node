@@ -151,3 +151,5 @@ export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({ error: 'Something went wrong' })
   }
 }
+
+export const deleteHabit = async () => {}
